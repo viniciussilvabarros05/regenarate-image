@@ -61,13 +61,27 @@ export function ImageUploadPlaceHolder() {
     },
   });
 
-  const handleEnhance = async ()=>{
+  const handleEnhance = async () => {
     try {
-      
+      const supabase = browserClient();
+
+      const {
+        data: { publicUrl },
+      } = await supabase.storage
+        .from(process.env.NEXT_PUBLIC_SUPABASE_APP_BUCKET_IMAGE_FOLDER)
+        .getPublicUrl(`${fileToProcess?.path}`);
+
+      const res = await fetch("/api/ai/replicate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: publicUrl }),
+      });
     } catch (error) {
-      console.log("handleEnhance:", error)
+      console.log("handleEnhance:", error);
     }
-  }
+  };
 
   useEffect(() => {
     return () => {
@@ -161,7 +175,9 @@ export function ImageUploadPlaceHolder() {
               </div>
             </div>
             <DialogFooter className="flex items-center">
-              <Button className="w-full" onClick={handleEnhance}>Enhance</Button>
+              <Button className="w-full" onClick={handleEnhance}>
+                Enhance
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
